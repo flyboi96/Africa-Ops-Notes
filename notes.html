@@ -1,0 +1,769 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Africa Ops Notes | Notes</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: rgba(15, 23, 42, 0.92);
+      --panel-border: rgba(255, 255, 255, 0.1);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --success: #34d399;
+      --card: rgba(255, 255, 255, 0.04);
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.12), transparent 20%),
+        linear-gradient(135deg, #050816 0%, #0a1222 45%, #111827 100%);
+      color: var(--text);
+    }
+
+    body {
+      padding: 24px;
+    }
+
+    .page {
+      width: min(1440px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .topbar,
+    .layout,
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .topbar {
+      border-radius: var(--radius-xl);
+      padding: 20px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .title-wrap h1 {
+      margin: 0 0 6px;
+      font-size: clamp(1.8rem, 4vw, 2.7rem);
+      letter-spacing: -0.03em;
+    }
+
+    .title-wrap p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 0.96rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .layout {
+      border-radius: var(--radius-xl);
+      padding: 18px;
+      display: grid;
+      grid-template-columns: minmax(280px, 330px) minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .sidebar,
+    .editor-panel {
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .sidebar {
+      padding: 18px;
+      position: sticky;
+      top: 24px;
+    }
+
+    .editor-panel {
+      padding: 22px;
+    }
+
+    .section-title {
+      margin: 0 0 8px;
+      font-size: 1.15rem;
+    }
+
+    .section-copy,
+    .helper-copy,
+    .meta-copy,
+    .field-help,
+    .status-message {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .search-wrap,
+    .country-list,
+    .meta-grid,
+    .editor-grid,
+    .actions-row {
+      margin-top: 16px;
+    }
+
+    .search-wrap input,
+    select,
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      padding: 13px 14px;
+      font: inherit;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .search-wrap input::placeholder,
+    input::placeholder,
+    textarea::placeholder {
+      color: #64748b;
+    }
+
+    .search-wrap input:focus,
+    select:focus,
+    input:focus,
+    textarea:focus {
+      border-color: rgba(59, 130, 246, 0.9);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.16);
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .country-list {
+      display: grid;
+      gap: 10px;
+      max-height: 560px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .country-button {
+      width: 100%;
+      text-align: left;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      padding: 13px 14px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .country-button:hover {
+      background: rgba(255, 255, 255, 0.07);
+      transform: translateY(-1px);
+    }
+
+    .country-button.active {
+      background: rgba(59, 130, 246, 0.18);
+      border-color: rgba(96, 165, 250, 0.55);
+    }
+
+    .country-button strong {
+      display: block;
+      font-size: 0.97rem;
+      margin-bottom: 4px;
+    }
+
+    .country-button span {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(59, 130, 246, 0.14);
+      color: #bfdbfe;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .country-heading {
+      margin: 0 0 8px;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      letter-spacing: -0.03em;
+      line-height: 1.04;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .meta-card {
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .meta-card dt {
+      margin: 0 0 6px;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #93c5fd;
+      font-weight: 700;
+    }
+
+    .meta-card dd {
+      margin: 0;
+      color: var(--text);
+      line-height: 1.55;
+      font-size: 0.95rem;
+    }
+
+    .editor-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-top: 6px;
+    }
+
+    .status-message {
+      min-height: 24px;
+    }
+
+    .status-message.success {
+      color: var(--success);
+    }
+
+    .footer-note {
+      color: var(--muted);
+      text-align: center;
+      padding: 2px 10px 14px;
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 1100px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+
+      .meta-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .editor-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 16px;
+      }
+
+      .topbar,
+      .layout,
+      .sidebar,
+      .editor-panel {
+        padding: 16px;
+      }
+
+      .top-actions,
+      .actions-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div class="title-wrap">
+        <h1>Country Notes</h1>
+        <p>Browse, review, and edit country-specific entries in one structured place. This page is set up for a left-side country list and a right-side editor.</p>
+      </div>
+      <nav class="top-actions" aria-label="Page navigation">
+        <a class="btn btn-secondary" href="home.html">Home</a>
+        <a class="btn btn-secondary" href="map.html">Map</a>
+        <a class="btn btn-primary" href="index.html">Login</a>
+      </nav>
+    </header>
+
+    <section class="layout">
+      <aside class="sidebar" aria-label="Country selector">
+        <h2 class="section-title">Countries</h2>
+        <p class="section-copy">Use the search box or tap a country below to load its note set into the editor.</p>
+
+        <div class="search-wrap">
+          <input id="countrySearch" type="text" placeholder="Search countries" autocomplete="off" />
+        </div>
+
+        <div class="country-list" id="countryList"></div>
+      </aside>
+
+      <section class="editor-panel" aria-label="Country note editor">
+        <div class="pill">Notes editor</div>
+        <h2 class="country-heading" id="countryHeading">Select a country</h2>
+        <p class="helper-copy" id="countrySubheading">Choose a country from the left-side list to load the structured note fields.</p>
+
+        <dl class="meta-grid">
+          <div class="meta-card">
+            <dt>ISO3</dt>
+            <dd id="metaIso">--</dd>
+          </div>
+          <div class="meta-card">
+            <dt>Last Updated By</dt>
+            <dd id="metaUpdatedBy">--</dd>
+          </div>
+          <div class="meta-card">
+            <dt>Last Updated</dt>
+            <dd id="metaUpdatedAt">--</dd>
+          </div>
+        </dl>
+
+        <form id="notesForm" class="editor-grid">
+          <div class="field">
+            <label for="countryName">Country Name</label>
+            <input id="countryName" name="countryName" type="text" placeholder="Country name" />
+          </div>
+
+          <div class="field">
+            <label for="iso3">ISO3</label>
+            <input id="iso3" name="iso3" type="text" placeholder="ISO3 code" maxlength="3" />
+          </div>
+
+          <div class="field">
+            <label for="leadTime">Lead Time</label>
+            <input id="leadTime" name="leadTime" type="text" placeholder="Lead time" />
+          </div>
+
+          <div class="field">
+            <label for="validity">Validity</label>
+            <input id="validity" name="validity" type="text" placeholder="Validity" />
+          </div>
+
+          <div class="field full">
+            <label for="portsOfEntry">Ports of Entry</label>
+            <input id="portsOfEntry" name="portsOfEntry" type="text" placeholder="Comma-separated ports of entry" />
+            <p class="field-help">Enter ports as a comma-separated list. Example: DAAG, DAUG, DAAT</p>
+          </div>
+
+          <div class="field">
+            <label for="aircrewVisa">Aircrew Visa</label>
+            <input id="aircrewVisa" name="aircrewVisa" type="text" placeholder="Aircrew visa requirements" />
+          </div>
+
+          <div class="field">
+            <label for="passengerVisa">Passenger Visa</label>
+            <input id="passengerVisa" name="passengerVisa" type="text" placeholder="Passenger visa requirements" />
+          </div>
+
+          <div class="field full">
+            <label for="planningNotes">Planning Notes</label>
+            <textarea id="planningNotes" name="planningNotes" placeholder="Enter planning notes here"></textarea>
+          </div>
+
+          <div class="field full">
+            <label for="generalNotes">General Notes</label>
+            <textarea id="generalNotes" name="generalNotes" placeholder="Additional notes, caveats, or local procedures"></textarea>
+          </div>
+
+          <div class="field full actions-row">
+            <p class="status-message" id="statusMessage">This form is currently wired to local placeholder data. Next step is saving to Firestore.</p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn btn-secondary" type="button" id="resetBtn">Reset Changes</button>
+              <button class="btn btn-primary" type="submit">Save Notes</button>
+            </div>
+          </div>
+        </form>
+      </section>
+    </section>
+
+    <div class="footer-note">
+      Notes page scaffold complete. Next major step: replace placeholder country data with Firestore reads and writes, then add auth-based read-only versus editor behavior.
+    </div>
+  </main>
+
+  <script>
+    const countries = [
+      {
+        iso3: 'DZA',
+        name: 'Algeria',
+        leadTime: '15 days standard missions',
+        validity: 'ETA plus 72 hours',
+        portsOfEntry: ['DAAG', 'DAUG', 'DAAT'],
+        aircrewVisa: 'Required for RON',
+        passengerVisa: 'Required for RON',
+        planningNotes: 'No blanket clearance.',
+        generalNotes: 'Replace this placeholder data with Firestore-backed records.',
+        lastUpdatedBy: 'Alex Corbin',
+        lastUpdatedAt: 'Placeholder'
+      },
+      {
+        iso3: 'DJI',
+        name: 'Djibouti',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['HDAM'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry for Djibouti.',
+        generalNotes: 'Add Djibouti-specific planning notes here.',
+        lastUpdatedBy: 'Alex Corbin',
+        lastUpdatedAt: 'Placeholder'
+      },
+      {
+        iso3: 'EGY',
+        name: 'Egypt',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['HECA'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.',
+        generalNotes: 'Add Egypt-specific planning notes here.',
+        lastUpdatedBy: 'Alex Corbin',
+        lastUpdatedAt: 'Placeholder'
+      },
+      {
+        iso3: 'ETH',
+        name: 'Ethiopia',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['HAAB'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.',
+        generalNotes: 'Add Ethiopia-specific planning notes here.',
+        lastUpdatedBy: 'Alex Corbin',
+        lastUpdatedAt: 'Placeholder'
+      },
+      {
+        iso3: 'GHA',
+        name: 'Ghana',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['DGAA'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.',
+        generalNotes: 'Add Ghana-specific planning notes here.',
+        lastUpdatedBy: 'Alex Corbin',
+        lastUpdatedAt: 'Placeholder'
+      },
+      {
+        iso3: 'KEN',
+        name: 'Kenya',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['HKJK'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.',
+        generalNotes: 'Add Kenya-specific planning notes here.',
+        lastUpdatedBy: 'Alex Corbin',
+        lastUpdatedAt: 'Placeholder'
+      },
+      {
+        iso3: 'LBY',
+        name: 'Libya',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['HLLB'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.',
+        generalNotes: 'Add Libya-specific planning notes here.',
+        lastUpdatedBy: 'Alex Corbin',
+        lastUpdatedAt: 'Placeholder'
+      },
+      {
+        iso3: 'MAR',
+        name: 'Morocco',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['GMMX', 'GMMN'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.',
+        generalNotes: 'Add Morocco-specific planning notes here.',
+        lastUpdatedBy: 'Alex Corbin',
+        lastUpdatedAt: 'Placeholder'
+      },
+      {
+        iso3: 'NGA',
+        name: 'Nigeria',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['DNMM'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.',
+        generalNotes: 'Add Nigeria-specific planning notes here.',
+        lastUpdatedBy: 'Alex Corbin',
+        lastUpdatedAt: 'Placeholder'
+      },
+      {
+        iso3: 'TZA',
+        name: 'Tanzania',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['HTDA'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.',
+        generalNotes: 'Add Tanzania-specific planning notes here.',
+        lastUpdatedBy: 'Alex Corbin',
+        lastUpdatedAt: 'Placeholder'
+      }
+    ];
+
+    countries.sort((a, b) => a.name.localeCompare(b.name));
+
+    const countryList = document.getElementById('countryList');
+    const countrySearch = document.getElementById('countrySearch');
+    const notesForm = document.getElementById('notesForm');
+    const statusMessage = document.getElementById('statusMessage');
+    const resetBtn = document.getElementById('resetBtn');
+
+    const countryHeading = document.getElementById('countryHeading');
+    const countrySubheading = document.getElementById('countrySubheading');
+    const metaIso = document.getElementById('metaIso');
+    const metaUpdatedBy = document.getElementById('metaUpdatedBy');
+    const metaUpdatedAt = document.getElementById('metaUpdatedAt');
+
+    const fields = {
+      countryName: document.getElementById('countryName'),
+      iso3: document.getElementById('iso3'),
+      leadTime: document.getElementById('leadTime'),
+      validity: document.getElementById('validity'),
+      portsOfEntry: document.getElementById('portsOfEntry'),
+      aircrewVisa: document.getElementById('aircrewVisa'),
+      passengerVisa: document.getElementById('passengerVisa'),
+      planningNotes: document.getElementById('planningNotes'),
+      generalNotes: document.getElementById('generalNotes')
+    };
+
+    let selectedIso = null;
+
+    function setStatus(message, type = '') {
+      statusMessage.textContent = message;
+      statusMessage.className = `status-message ${type}`.trim();
+    }
+
+    function getCountryByIso(iso) {
+      return countries.find((country) => country.iso3 === iso) || null;
+    }
+
+    function renderCountryList(filter = '') {
+      const query = filter.trim().toLowerCase();
+      const filtered = countries.filter((country) => {
+        return !query || country.name.toLowerCase().includes(query) || country.iso3.toLowerCase().includes(query);
+      });
+
+      countryList.innerHTML = '';
+
+      filtered.forEach((country) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'country-button';
+        if (country.iso3 === selectedIso) {
+          button.classList.add('active');
+        }
+        button.innerHTML = `<strong>${country.name}</strong><span>${country.iso3}</span>`;
+        button.addEventListener('click', () => loadCountry(country.iso3));
+        countryList.appendChild(button);
+      });
+
+      if (!filtered.length) {
+        countryList.innerHTML = '<p class="meta-copy">No countries match your search.</p>';
+      }
+    }
+
+    function loadCountry(iso) {
+      const country = getCountryByIso(iso);
+      if (!country) return;
+
+      selectedIso = iso;
+      countryHeading.textContent = country.name;
+      countrySubheading.textContent = `Editing scaffold for ${country.name}. Replace local state with Firestore reads and writes next.`;
+      metaIso.textContent = country.iso3 || '--';
+      metaUpdatedBy.textContent = country.lastUpdatedBy || '--';
+      metaUpdatedAt.textContent = country.lastUpdatedAt || '--';
+
+      fields.countryName.value = country.name || '';
+      fields.iso3.value = country.iso3 || '';
+      fields.leadTime.value = country.leadTime || '';
+      fields.validity.value = country.validity || '';
+      fields.portsOfEntry.value = (country.portsOfEntry || []).join(', ');
+      fields.aircrewVisa.value = country.aircrewVisa || '';
+      fields.passengerVisa.value = country.passengerVisa || '';
+      fields.planningNotes.value = country.planningNotes || '';
+      fields.generalNotes.value = country.generalNotes || '';
+
+      renderCountryList(countrySearch.value);
+      setStatus(`Loaded ${country.name}.`, 'success');
+    }
+
+    notesForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      if (!selectedIso) {
+        setStatus('Select a country before saving.');
+        return;
+      }
+
+      const country = getCountryByIso(selectedIso);
+      if (!country) return;
+
+      country.name = fields.countryName.value.trim();
+      country.iso3 = fields.iso3.value.trim().toUpperCase();
+      country.leadTime = fields.leadTime.value.trim();
+      country.validity = fields.validity.value.trim();
+      country.portsOfEntry = fields.portsOfEntry.value
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean);
+      country.aircrewVisa = fields.aircrewVisa.value.trim();
+      country.passengerVisa = fields.passengerVisa.value.trim();
+      country.planningNotes = fields.planningNotes.value.trim();
+      country.generalNotes = fields.generalNotes.value.trim();
+      country.lastUpdatedBy = 'Local placeholder user';
+      country.lastUpdatedAt = new Date().toLocaleString();
+
+      selectedIso = country.iso3;
+      loadCountry(selectedIso);
+      setStatus(`Saved placeholder changes for ${country.name}. Connect this action to Firestore next.`, 'success');
+    });
+
+    resetBtn.addEventListener('click', () => {
+      if (!selectedIso) {
+        setStatus('Select a country before resetting.');
+        return;
+      }
+      loadCountry(selectedIso);
+      setStatus('Unsaved changes reset to the currently loaded placeholder data.');
+    });
+
+    countrySearch.addEventListener('input', () => {
+      renderCountryList(countrySearch.value);
+    });
+
+    renderCountryList();
+    loadCountry('DZA');
+  </script>
+</body>
+</html>
