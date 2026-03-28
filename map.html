@@ -205,6 +205,45 @@
       display: block;
     }
 
+    .svg-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      padding: 12px;
+    }
+
+    .svg-container svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .svg-container .land {
+      fill: var(--country);
+      stroke: rgba(255, 255, 255, 0.22);
+      stroke-width: 1.2;
+      cursor: pointer;
+      transition: fill 0.15s ease, opacity 0.15s ease;
+    }
+
+    .svg-container .land:hover,
+    .svg-container .land:focus-visible {
+      fill: var(--country-hover);
+      outline: none;
+    }
+
+    .svg-container .land.active {
+      fill: var(--country-active);
+    }
+
+    .svg-container .circle {
+      opacity: 0;
+      pointer-events: none;
+    }
+
     .country {
       fill: var(--country);
       stroke: rgba(255, 255, 255, 0.22);
@@ -396,58 +435,9 @@
         <div class="map-shell">
           <div class="map-grid" aria-hidden="true"></div>
           <svg viewBox="0 0 900 650" role="img" aria-label="Interactive map of Africa">
-            <g>
-              <polygon class="country" data-country="MAR" points="168,90 207,95 228,112 220,138 190,145 160,136 150,112" tabindex="0"></polygon>
-              <text class="country-label" x="190" y="118">Morocco</text>
-
-              <polygon class="country" data-country="DZA" points="228,110 320,108 402,122 424,148 406,194 327,206 248,196 216,160" tabindex="0"></polygon>
-              <text class="country-label" x="320" y="158">Algeria</text>
-
-              <polygon class="country" data-country="LBY" points="424,138 500,136 578,148 592,182 560,212 470,214 410,192 406,156" tabindex="0"></polygon>
-              <text class="country-label" x="500" y="178">Libya</text>
-
-              <polygon class="country" data-country="EGY" points="596,118 700,126 722,162 714,206 644,218 590,196 584,146" tabindex="0"></polygon>
-              <text class="country-label" x="652" y="170">Egypt</text>
-
-              <polygon class="country" data-country="MLI" points="202,210 278,206 306,222 300,288 232,308 178,286 174,236" tabindex="0"></polygon>
-              <text class="country-label" x="238" y="255">Mali</text>
-
-              <polygon class="country" data-country="NER" points="308,222 390,220 462,232 470,274 406,298 318,294 294,266" tabindex="0"></polygon>
-              <text class="country-label" x="382" y="262">Niger</text>
-
-              <polygon class="country" data-country="TCD" points="470,234 546,238 586,260 582,328 520,346 470,324 456,274" tabindex="0"></polygon>
-              <text class="country-label" x="524" y="287">Chad</text>
-
-              <polygon class="country" data-country="SDN" points="586,214 664,220 726,246 730,338 692,378 636,360 588,310 578,250" tabindex="0"></polygon>
-              <text class="country-label" x="652" y="292">Sudan</text>
-
-              <polygon class="country" data-country="ETH" points="696,372 760,362 798,390 790,432 742,450 692,432 678,398" tabindex="0"></polygon>
-              <text class="country-label" x="738" y="405">Ethiopia</text>
-
-              <polygon class="country" data-country="DJI" points="806,392 822,388 830,400 826,414 810,416 802,404" tabindex="0"></polygon>
-              <text class="country-label" x="818" y="432">Djibouti</text>
-
-              <polygon class="country" data-country="GHA" points="248,360 276,358 286,396 280,432 258,446 242,434 240,388" tabindex="0"></polygon>
-              <text class="country-label" x="264" y="404">Ghana</text>
-
-              <polygon class="country" data-country="NGA" points="292,330 374,326 444,346 446,388 396,412 320,404 286,374" tabindex="0"></polygon>
-              <text class="country-label" x="368" y="372">Nigeria</text>
-
-              <polygon class="country" data-country="COD" points="444,386 546,388 610,418 620,494 584,544 492,542 432,500 424,438" tabindex="0"></polygon>
-              <text class="country-label" x="524" y="468">DRC</text>
-
-              <polygon class="country" data-country="KEN" points="664,454 726,450 750,478 742,530 700,548 662,524 654,484" tabindex="0"></polygon>
-              <text class="country-label" x="704" y="500">Kenya</text>
-
-              <polygon class="country" data-country="TZA" points="628,540 708,542 734,576 716,616 654,620 622,588" tabindex="0"></polygon>
-              <text class="country-label" x="678" y="582">Tanzania</text>
-
-              <polygon class="country" data-country="AGO" points="430,548 520,548 566,574 560,622 494,632 430,612 410,578" tabindex="0"></polygon>
-              <text class="country-label" x="490" y="592">Angola</text>
-
-              <polygon class="country" data-country="ZAF" points="574,602 654,592 716,606 734,628 700,642 610,644 562,628" tabindex="0"></polygon>
-              <text class="country-label" x="650" y="624">South Africa</text>
-            </g>
+            <div id="africaSvgContainer" class="svg-container" aria-live="polite">
+            Loading Africa map...
+          </div>
           </svg>
         </div>
       </section>
@@ -504,6 +494,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     const signOutBtn = document.getElementById('signOutBtn');
+    const africaSvgContainer = document.getElementById('africaSvgContainer');
 
     onAuthStateChanged(auth, (user) => {
       if (!user) {
@@ -522,6 +513,112 @@
     });
 
     let countryData = {};
+    const iso2ToIso3 = {
+      ao: 'AGO',
+      dz: 'DZA',
+      bw: 'BWA',
+      bf: 'BFA',
+      bi: 'BDI',
+      bj: 'BEN',
+      ci: 'CIV',
+      cm: 'CMR',
+      cd: 'COD',
+      cg: 'COG',
+      cf: 'CAF',
+      cv: 'CPV',
+      dj: 'DJI',
+      eg: 'EGY',
+      eh: 'ESH',
+      er: 'ERI',
+      et: 'ETH',
+      ga: 'GAB',
+      gh: 'GHA',
+      gm: 'GMB',
+      gn: 'GIN',
+      gq: 'GNQ',
+      gw: 'GNB',
+      ke: 'KEN',
+      km: 'COM',
+      lr: 'LBR',
+      ly: 'LBY',
+      ls: 'LSO',
+      ma: 'MAR',
+      mg: 'MDG',
+      ml: 'MLI',
+      mr: 'MRT',
+      mu: 'MUS',
+      mw: 'MWI',
+      mz: 'MOZ',
+      na: 'NAM',
+      ne: 'NER',
+      ng: 'NGA',
+      rw: 'RWA',
+      sd: 'SDN',
+      ss: 'SSD',
+      sn: 'SEN',
+      sl: 'SLE',
+      so: 'SOM',
+      st: 'STP',
+      sz: 'SWZ',
+      td: 'TCD',
+      tg: 'TGO',
+      tn: 'TUN',
+      tz: 'TZA',
+      ug: 'UGA',
+      za: 'ZAF',
+      zm: 'ZMB',
+      zw: 'ZWE'
+    };
+
+    function getCountryElements() {
+      return africaSvgContainer.querySelectorAll('.land[data-country]');
+    }
+
+    function extractIso2(el) {
+      const id = (el.id || '').trim().toLowerCase();
+      if (id && iso2ToIso3[id]) return id;
+
+      const matchClass = [...el.classList].find((cls) => iso2ToIso3[cls.toLowerCase()]);
+      return matchClass ? matchClass.toLowerCase() : '';
+    }
+
+    async function loadAfricaSvg() {
+      const response = await fetch('BlankMap-Africa.svg');
+      if (!response.ok) {
+        throw new Error(`SVG load failed with status ${response.status}`);
+      }
+
+      const svgText = await response.text();
+      africaSvgContainer.innerHTML = svgText;
+
+      const svgEl = africaSvgContainer.querySelector('svg');
+      if (!svgEl) {
+        throw new Error('No SVG element found in BlankMap-Africa.svg');
+      }
+
+      svgEl.setAttribute('role', 'img');
+      svgEl.setAttribute('aria-label', 'Interactive political map of Africa');
+      svgEl.removeAttribute('width');
+      svgEl.removeAttribute('height');
+      svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+      africaSvgContainer.querySelectorAll('.land').forEach((el) => {
+        const iso2 = extractIso2(el);
+        const iso3 = iso2ToIso3[iso2];
+        if (!iso3) return;
+
+        el.dataset.country = iso3;
+        el.setAttribute('tabindex', '0');
+
+        el.addEventListener('click', () => renderCountry(iso3));
+        el.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            renderCountry(iso3);
+          }
+        });
+      });
+    }
 
     async function fetchCountryData() {
       const snapshot = await getDocs(collection(db, 'countries'));
@@ -550,13 +647,13 @@
     const detailCountry = document.getElementById('detailCountry');
     const detailIntro = document.getElementById('detailIntro');
     const detailContent = document.getElementById('detailContent');
-    const countryEls = document.querySelectorAll('.country');
+    const countryEls = () => getCountryElements();
 
     function renderCountry(code) {
       const normalizedCode = (code || '').toUpperCase();
       const data = countryData[normalizedCode];
 
-      countryEls.forEach((el) => {
+      countryEls().forEach((el) => {
         el.classList.toggle('active', el.dataset.country === normalizedCode);
       });
 
@@ -623,25 +720,16 @@
       `;
     }
 
-    countryEls.forEach((el) => {
-      el.addEventListener('click', () => renderCountry(el.dataset.country));
-      el.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          renderCountry(el.dataset.country);
-        }
-      });
-    });
-
-    fetchCountryData().catch((error) => {
-      console.error('Failed to load map country data:', error);
+    Promise.all([loadAfricaSvg(), fetchCountryData()]).catch((error) => {
+      console.error('Failed to load map page data:', error);
       detailCountry.textContent = 'Unable to load country data';
-      detailIntro.textContent = 'Firestore read failed.';
+      detailIntro.textContent = 'Map or Firestore load failed.';
       detailContent.innerHTML = `
         <div class="detail-empty">
-          Unable to load country records from Firestore right now. Check your Firestore setup and security rules.
+          Unable to load the Africa SVG or Firestore country records right now. Check that BlankMap-Africa.svg is in the project root and that Firestore is configured correctly.
         </div>
       `;
+      africaSvgContainer.innerHTML = 'Unable to load Africa map.';
     });
   </script>
 </body>
