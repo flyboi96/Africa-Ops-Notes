@@ -3,26 +3,397 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Africa Ops Notes | Home</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>Africa Ops Notes | Login</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: rgba(17, 24, 39, 0.88);
+      --panel-border: rgba(255, 255, 255, 0.1);
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --input: rgba(255, 255, 255, 0.06);
+      --input-border: rgba(255, 255, 255, 0.14);
+      --danger: #f87171;
+      --success: #34d399;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      --radius: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.2), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(34, 197, 94, 0.14), transparent 24%),
+        linear-gradient(135deg, #050816 0%, #0b1020 45%, #111827 100%);
+      color: var(--text);
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .shell {
+      width: min(100%, 1080px);
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .info-panel,
+    .login-panel {
+      backdrop-filter: blur(12px);
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .info-panel {
+      padding: 36px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 640px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #bfdbfe;
+      margin-bottom: 20px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 18px rgba(59, 130, 246, 0.85);
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+
+    .lede {
+      margin: 0 0 28px;
+      font-size: 1.03rem;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 56ch;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .feature-card {
+      padding: 18px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .feature-card h2 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    .feature-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 0.95rem;
+    }
+
+    .footer-copy {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    .login-panel {
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 640px;
+    }
+
+    .login-header {
+      margin-bottom: 26px;
+    }
+
+    .login-header h2 {
+      margin: 0 0 10px;
+      font-size: 1.8rem;
+      letter-spacing: -0.02em;
+    }
+
+    .login-header p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    form {
+      display: grid;
+      gap: 18px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid var(--input-border);
+      border-radius: 14px;
+      background: var(--input);
+      color: var(--text);
+      padding: 14px 16px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    input::placeholder {
+      color: #6b7280;
+    }
+
+    input:focus {
+      border-color: rgba(59, 130, 246, 0.9);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.18);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .password-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .ghost-link {
+      appearance: none;
+      background: none;
+      border: none;
+      color: #93c5fd;
+      padding: 0;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .ghost-link:hover {
+      color: #dbeafe;
+      text-decoration: underline;
+    }
+
+    .primary-btn {
+      appearance: none;
+      border: none;
+      border-radius: 14px;
+      background: var(--accent);
+      color: white;
+      padding: 15px 18px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 14px 24px rgba(37, 99, 235, 0.28);
+    }
+
+    .primary-btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .primary-btn:disabled {
+      opacity: 0.72;
+      cursor: wait;
+      transform: none;
+    }
+
+    .status {
+      min-height: 24px;
+      font-size: 0.94rem;
+      line-height: 1.5;
+      margin-top: 4px;
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .status.success {
+      color: var(--success);
+    }
+
+    .helper-box {
+      margin-top: 22px;
+      padding: 16px 18px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    .helper-box strong {
+      color: var(--text);
+    }
+
+    @media (max-width: 920px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      .info-panel,
+      .login-panel {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 16px;
+      }
+
+      .info-panel,
+      .login-panel {
+        padding: 24px;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <h1>Africa Ops Notes</h1>
-    <div class="hero-actions">
-      <button id="signOutBtn" type="button">Sign Out</button>
-    </div>
-  </header>
-  <main>
-    <!-- Main content here -->
+  <main class="shell">
+    <section class="info-panel" aria-label="Program overview">
+      <div>
+        <div class="eyebrow">Protected operational reference</div>
+        <h1>Africa Ops Notes</h1>
+        <p class="lede">
+          Centralized country notes for planning, clearances, visas, ports of entry, and mission-relevant gouge.
+          Access is restricted to approved users. All country data will live behind authentication.
+        </p>
+
+        <div class="feature-grid">
+          <article class="feature-card">
+            <h2>Home</h2>
+            <p>Explains the purpose of the site and gives users a clean starting point after login.</p>
+          </article>
+          <article class="feature-card">
+            <h2>Map</h2>
+            <p>Tap any country on the Africa map to pull up the associated notes in an iPad-friendly side panel.</p>
+          </article>
+          <article class="feature-card">
+            <h2>Notes</h2>
+            <p>View and edit country-specific fields in one place without digging through separate documents.</p>
+          </article>
+          <article class="feature-card">
+            <h2>Access Control</h2>
+            <p>Only authenticated users can get into the site. Editing will later be limited by Firebase roles.</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="footer-copy">
+        Version 1 objective: secure login first, then authenticated access to the home, map, and notes pages.
+      </div>
+    </section>
+
+    <section class="login-panel" aria-label="Login form">
+      <div class="login-header">
+        <h2>Sign in</h2>
+        <p>
+          Use your approved credentials to access the site.
+        </p>
+      </div>
+
+      <form id="loginForm" novalidate>
+        <div class="field">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="username"
+            placeholder="name@example.com"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <div class="password-row">
+            <label for="password">Password</label>
+            <button type="button" class="ghost-link" id="forgotPasswordBtn">Forgot password?</button>
+          </div>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Enter password"
+            required
+          />
+        </div>
+
+        <button type="submit" class="primary-btn" id="signInBtn">Sign in</button>
+        <div class="status" id="statusMessage" aria-live="polite"></div>
+      </form>
+
+      <div class="helper-box">
+        <strong>Firebase setup:</strong> this page is connected to Firebase Authentication and will redirect authenticated users to <code>home.html</code>.
+      </div>
+    </section>
   </main>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
     import {
       getAuth,
-      onAuthStateChanged,
-      signOut
+      signInWithEmailAndPassword,
+      sendPasswordResetEmail,
+      onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -36,21 +407,89 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const signOutBtn = document.getElementById('signOutBtn');
+
+    const loginForm = document.getElementById('loginForm');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const signInBtn = document.getElementById('signInBtn');
+    const statusMessage = document.getElementById('statusMessage');
+    const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+
+    function setStatus(message, type = '') {
+      statusMessage.textContent = message;
+      statusMessage.className = `status ${type}`.trim();
+    }
+
+    function setLoading(isLoading) {
+      signInBtn.disabled = isLoading;
+      signInBtn.textContent = isLoading ? 'Signing in...' : 'Sign in';
+    }
+
+    function getReadableAuthError(errorCode) {
+      switch (errorCode) {
+        case 'auth/invalid-email':
+          return 'Enter a valid email address.';
+        case 'auth/missing-password':
+        case 'auth/invalid-credential':
+        case 'auth/wrong-password':
+        case 'auth/user-not-found':
+          return 'Incorrect email or password.';
+        case 'auth/too-many-requests':
+          return 'Too many failed attempts. Try again later or reset your password.';
+        case 'auth/network-request-failed':
+          return 'Network error. Check your connection and try again.';
+        default:
+          return 'Unable to sign in right now. Check your Firebase Authentication setup and try again.';
+      }
+    }
 
     onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        window.location.href = 'index.html';
+      if (user) {
+        window.location.href = 'home.html';
       }
     });
 
-    signOutBtn.addEventListener('click', async () => {
+    loginForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email || !password) {
+        setStatus('Enter both email and password.', 'error');
+        return;
+      }
+
       try {
-        await signOut(auth);
-        window.location.href = 'index.html';
+        setLoading(true);
+        setStatus('Signing in...', 'success');
+        await signInWithEmailAndPassword(auth, email, password);
+        setStatus('Sign-in successful. Redirecting...', 'success');
+        window.location.href = 'home.html';
       } catch (error) {
-        console.error('Sign-out failed:', error);
-        alert('Unable to sign out right now. Please try again.');
+        setStatus(getReadableAuthError(error.code), 'error');
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    forgotPasswordBtn.addEventListener('click', async () => {
+      const email = emailInput.value.trim();
+
+      if (!email) {
+        setStatus('Enter your email first, then select Forgot password.', 'error');
+        return;
+      }
+
+      try {
+        await sendPasswordResetEmail(auth, email);
+        setStatus('Password reset email sent.', 'success');
+      } catch (error) {
+        if (error.code === 'auth/invalid-email') {
+          setStatus('Enter a valid email address.', 'error');
+        } else {
+          setStatus('Unable to send password reset email right now.', 'error');
+        }
       }
     });
   </script>
