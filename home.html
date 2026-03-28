@@ -369,11 +369,44 @@
     </div>
   </main>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDiFzsjV1ccCCZKssdGKT4UQusQL-IXy-E",
+      authDomain: "africa-ops-notes.firebaseapp.com",
+      projectId: "africa-ops-notes",
+      storageBucket: "africa-ops-notes.firebasestorage.app",
+      messagingSenderId: "503859879624",
+      appId: "1:503859879624:web:e3e77ba959b31420998ffd"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
     const signOutBtn = document.getElementById('signOutBtn');
 
-    signOutBtn.addEventListener('click', () => {
-      alert('Placeholder: connect this button to Firebase signOut(), then redirect to index.html.');
+    // PROTECT PAGE: redirect if not logged in
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = 'index.html';
+      }
+    });
+
+    // SIGN OUT BUTTON
+    signOutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+        window.location.href = 'index.html';
+      } catch (error) {
+        console.error('Sign-out failed:', error);
+        alert('Unable to sign out. Try again.');
+      }
     });
   </script>
 </body>
