@@ -129,7 +129,7 @@
       border-radius: var(--radius-xl);
       padding: 18px;
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1.45fr) minmax(300px, 380px);
       gap: 18px;
       align-items: start;
     }
@@ -148,9 +148,10 @@
 
     .detail-panel {
       padding: 22px;
-      position: static;
-      max-height: none;
-      overflow: visible;
+      position: sticky;
+      top: 24px;
+      max-height: 78vh;
+      overflow: auto;
     }
 
     .map-header,
@@ -214,13 +215,18 @@
       justify-content: center;
       color: var(--muted);
       padding: 4px;
-      overflow: auto;
+      overflow: hidden;
+      cursor: grab;
+      touch-action: none;
     }
 
     .svg-container svg {
       width: 100%;
       height: 100%;
       display: block;
+    }
+    .svg-container.dragging {
+      cursor: grabbing;
     }
 
     .svg-container .land {
@@ -257,6 +263,36 @@
       line-height: 1.55;
       white-space: pre-wrap;
       word-break: break-word;
+    }
+
+    .map-controls {
+      position: absolute;
+      right: 16px;
+      bottom: 16px;
+      display: flex;
+      gap: 10px;
+      z-index: 3;
+    }
+
+    .map-control-btn {
+      appearance: none;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(15, 23, 42, 0.92);
+      color: var(--text);
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow);
+    }
+
+    .map-control-btn:hover {
+      background: rgba(30, 41, 59, 0.98);
     }
 
     .country {
@@ -445,6 +481,11 @@
           <div id="africaSvgContainer" class="svg-container" aria-live="polite">
             Loading Africa map...
           </div>
+          <div class="map-controls" aria-label="Map zoom controls">
+            <button class="map-control-btn" id="zoomOutBtn" type="button" aria-label="Zoom out">−</button>
+            <button class="map-control-btn" id="zoomResetBtn" type="button" aria-label="Reset zoom">⌂</button>
+            <button class="map-control-btn" id="zoomInBtn" type="button" aria-label="Zoom in">+</button>
+          </div>
         </div>
       </section>
 
@@ -502,6 +543,9 @@
     const db = getFirestore(app);
     const signOutBtn = document.getElementById('signOutBtn');
     const africaSvgContainer = document.getElementById('africaSvgContainer');
+    const zoomOutBtn = document.getElementById('zoomOutBtn');
+    const zoomResetBtn = document.getElementById('zoomResetBtn');
+    const zoomInBtn = document.getElementById('zoomInBtn');
     const debugBox = document.getElementById('debugBox');
 
     onAuthStateChanged(auth, (user) => {
@@ -521,6 +565,14 @@
     });
 
     let countryData = {};
+    let currentZoom = 1;
+    let currentSvgElement = null;
+    let panX = 0;
+    let panY = 0;
+let isDragging = false;
+let didDrag = false;
+let dragStartX = 0;
+let dragStartY = 0;
     const iso2ToIso3 = {
       ao: 'AGO',
       dz: 'DZA',
@@ -595,6 +647,17 @@
       console.log('[Africa Map Debug]', message);
     }
 
+    function applyZoom() {
+      if (!currentSvgElement) return;
+      currentSvgElement.style.transform = `translate(${panX}px, ${panY}px) scale(${currentZoom})`;
+    }
+
+    function setZoom(nextZoom) {
+      currentZoom = Math.min(3, Math.max(1, nextZoom));
+      applyZoom();
+      setDebug(`Map zoom: ${currentZoom.toFixed(2)}x`);
+    }
+
     async function loadAfricaSvg() {
       const svgUrl = new URL('./BlankMap-Africa.svg', window.location.href).toString();
       setDebug(`Loading SVG from ${svgUrl}`);
@@ -614,12 +677,15 @@
       if (!svgEl) {
         throw new Error('No SVG element found in BlankMap-Africa.svg');
       }
+      currentSvgElement = svgEl;
+      currentZoom = 1;
 
       svgEl.setAttribute('role', 'img');
       svgEl.setAttribute('aria-label', 'Interactive political map of Africa');
       svgEl.removeAttribute('width');
       svgEl.removeAttribute('height');
       svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      applyZoom();
 
       const landElements = africaSvgContainer.querySelectorAll('.land');
       setDebug(`SVG rendered. Found ${landElements.length} .land elements.`);
@@ -748,6 +814,67 @@
         </dl>
       `;
     }
+
+    africaSvgContainer.addEventListener('mousedown', (event) => {
+      if (!currentSvgElement) return;
+      isDragging = true;
+      didDrag = false;
+      dragStartX = event.clientX - panX;
+      dragStartY = event.clientY - panY;
+      africaSvgContainer.classList.add('dragging');
+    });
+
+    africaSvgContainer.addEventListener('touchstart', (event) => {
+      if (!currentSvgElement || !event.touches.length) return;
+      isDragging = true;
+      didDrag = false;
+      dragStartX = event.touches[0].clientX - panX;
+      dragStartY = event.touches[0].clientY - panY;
+      africaSvgContainer.classList.add('dragging');
+    }, { passive: true });
+
+    window.addEventListener('mousemove', (event) => {
+      if (!isDragging) return;
+      panX = event.clientX - dragStartX;
+      panY = event.clientY - dragStartY;
+      applyZoom();
+    });
+
+    window.addEventListener('touchmove', (event) => {
+      if (!isDragging || !event.touches.length) return;
+      panX = event.touches[0].clientX - dragStartX;
+      panY = event.touches[0].clientY - dragStartY;
+      applyZoom();
+    }, { passive: true });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+      africaSvgContainer.classList.remove('dragging');
+    });
+
+    window.addEventListener('touchend', () => {
+      isDragging = false;
+      africaSvgContainer.classList.remove('dragging');
+    });
+
+    window.addEventListener('touchcancel', () => {
+      isDragging = false;
+      africaSvgContainer.classList.remove('dragging');
+    });
+
+    zoomInBtn.addEventListener('click', () => {
+      setZoom(currentZoom + 0.2);
+    });
+
+    zoomOutBtn.addEventListener('click', () => {
+      setZoom(currentZoom - 0.2);
+    });
+
+    zoomResetBtn.addEventListener('click', () => {
+      panX = 0;
+      panY = 0;
+      setZoom(1);
+    });
 
     Promise.allSettled([loadAfricaSvg(), fetchCountryData()]).then((results) => {
       const [svgResult, firestoreResult] = results;
