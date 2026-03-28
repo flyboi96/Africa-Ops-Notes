@@ -581,7 +581,7 @@
     }
 
     async function loadAfricaSvg() {
-      const response = await fetch('BlankMap-Africa.svg');
+      const response = await fetch('./BlankMap-Africa.svg');
       if (!response.ok) {
         throw new Error(`SVG load failed with status ${response.status}`);
       }
