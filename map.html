@@ -1,0 +1,695 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Africa Ops Notes | Map</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: rgba(15, 23, 42, 0.92);
+      --panel-border: rgba(255, 255, 255, 0.1);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --country: #1e293b;
+      --country-hover: #2563eb;
+      --country-active: #60a5fa;
+      --card: rgba(255, 255, 255, 0.04);
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.12), transparent 20%),
+        linear-gradient(135deg, #050816 0%, #0a1222 45%, #111827 100%);
+      color: var(--text);
+    }
+
+    body {
+      padding: 24px;
+    }
+
+    .page {
+      width: min(1380px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .topbar,
+    .layout,
+    .panel,
+    .legend {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .topbar {
+      border-radius: var(--radius-xl);
+      padding: 20px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .title-wrap h1 {
+      margin: 0 0 6px;
+      font-size: clamp(1.8rem, 4vw, 2.7rem);
+      letter-spacing: -0.03em;
+    }
+
+    .title-wrap p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      appearance: none;
+      border: none;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-size: 0.96rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .layout {
+      border-radius: var(--radius-xl);
+      padding: 18px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, 420px);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .map-panel,
+    .detail-panel {
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .map-panel {
+      padding: 18px;
+      overflow: hidden;
+    }
+
+    .detail-panel {
+      padding: 22px;
+      position: sticky;
+      top: 24px;
+    }
+
+    .map-header,
+    .detail-header {
+      margin-bottom: 16px;
+    }
+
+    .map-header h2,
+    .detail-header h2 {
+      margin: 0 0 8px;
+      font-size: 1.2rem;
+    }
+
+    .map-header p,
+    .detail-header p,
+    .detail-field dd,
+    .detail-field li,
+    .detail-empty,
+    .legend p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 0.96rem;
+    }
+
+    .map-shell {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1.35 / 1;
+      min-height: 520px;
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(59, 130, 246, 0.08), rgba(15, 23, 42, 0.24)),
+        rgba(2, 6, 23, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+    }
+
+    .map-grid {
+      position: absolute;
+      inset: 0;
+      opacity: 0.12;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.28) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.28) 1px, transparent 1px);
+      background-size: 44px 44px;
+      pointer-events: none;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .country {
+      fill: var(--country);
+      stroke: rgba(255, 255, 255, 0.22);
+      stroke-width: 2;
+      cursor: pointer;
+      transition: fill 0.15s ease, transform 0.15s ease;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .country:hover,
+    .country:focus-visible {
+      fill: var(--country-hover);
+      outline: none;
+      transform: translateY(-2px);
+    }
+
+    .country.active {
+      fill: var(--country-active);
+    }
+
+    .country-label {
+      fill: #dbeafe;
+      font-size: 12px;
+      font-weight: 700;
+      pointer-events: none;
+      text-anchor: middle;
+    }
+
+    .detail-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(59, 130, 246, 0.14);
+      color: #bfdbfe;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .detail-country {
+      margin: 0 0 16px;
+      font-size: 2rem;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .detail-field {
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .detail-field dt {
+      margin: 0 0 6px;
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #93c5fd;
+      font-weight: 700;
+    }
+
+    .detail-field dd {
+      margin: 0;
+      color: var(--text);
+    }
+
+    .detail-field ul {
+      margin: 6px 0 0;
+      padding-left: 18px;
+      color: var(--text);
+    }
+
+    .detail-empty {
+      padding: 18px;
+      border-radius: var(--radius-md);
+      background: var(--card);
+      border: 1px dashed rgba(255, 255, 255, 0.12);
+      margin-top: 18px;
+    }
+
+    .legend {
+      border-radius: var(--radius-xl);
+      padding: 18px 20px;
+    }
+
+    .legend h3 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+    }
+
+    .legend-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .swatch-default {
+      background: var(--country);
+    }
+
+    .swatch-hover {
+      background: var(--country-hover);
+    }
+
+    .swatch-active {
+      background: var(--country-active);
+    }
+
+    @media (max-width: 1080px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .detail-panel {
+        position: static;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 16px;
+      }
+
+      .topbar,
+      .layout,
+      .legend {
+        padding: 16px;
+      }
+
+      .map-panel,
+      .detail-panel {
+        padding: 16px;
+      }
+
+      .map-shell {
+        min-height: 420px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div class="title-wrap">
+        <h1>Africa Map</h1>
+        <p>Select a country to view the currently stored notes. This page is designed for a touch-friendly side-panel workflow.</p>
+      </div>
+      <nav class="top-actions" aria-label="Page navigation">
+        <a class="btn btn-secondary" href="home.html">Home</a>
+        <a class="btn btn-secondary" href="notes.html">Notes</a>
+        <a class="btn btn-primary" href="index.html">Login</a>
+      </nav>
+    </header>
+
+    <section class="layout">
+      <section class="map-panel" aria-label="Africa map selection area">
+        <div class="map-header">
+          <h2>Map view</h2>
+          <p>Version 1 uses a simplified interactive map scaffold. Each country tile is clickable and already wired to update the side panel.</p>
+        </div>
+
+        <div class="map-shell">
+          <div class="map-grid" aria-hidden="true"></div>
+          <svg viewBox="0 0 900 650" role="img" aria-label="Interactive map of Africa">
+            <g>
+              <rect class="country" data-country="MAR" x="120" y="80" width="110" height="70" rx="16" tabindex="0"></rect>
+              <text class="country-label" x="175" y="122">Morocco</text>
+
+              <rect class="country" data-country="DZA" x="245" y="105" width="180" height="95" rx="18" tabindex="0"></rect>
+              <text class="country-label" x="335" y="158">Algeria</text>
+
+              <rect class="country" data-country="LBY" x="445" y="130" width="145" height="82" rx="18" tabindex="0"></rect>
+              <text class="country-label" x="517" y="178">Libya</text>
+
+              <rect class="country" data-country="EGY" x="615" y="110" width="130" height="90" rx="18" tabindex="0"></rect>
+              <text class="country-label" x="680" y="162">Egypt</text>
+
+              <rect class="country" data-country="MLI" x="180" y="205" width="125" height="88" rx="18" tabindex="0"></rect>
+              <text class="country-label" x="242" y="255">Mali</text>
+
+              <rect class="country" data-country="NER" x="330" y="220" width="145" height="84" rx="18" tabindex="0"></rect>
+              <text class="country-label" x="402" y="268">Niger</text>
+
+              <rect class="country" data-country="TCD" x="490" y="230" width="120" height="92" rx="18" tabindex="0"></rect>
+              <text class="country-label" x="550" y="282">Chad</text>
+
+              <rect class="country" data-country="SDN" x="632" y="228" width="120" height="112" rx="18" tabindex="0"></rect>
+              <text class="country-label" x="692" y="287">Sudan</text>
+
+              <rect class="country" data-country="ETH" x="680" y="360" width="115" height="92" rx="18" tabindex="0"></rect>
+              <text class="country-label" x="737" y="411">Ethiopia</text>
+
+              <rect class="country" data-country="DJI" x="808" y="372" width="52" height="48" rx="14" tabindex="0"></rect>
+              <text class="country-label" x="834" y="401">DJI</text>
+
+              <rect class="country" data-country="NGA" x="340" y="335" width="130" height="88" rx="18" tabindex="0"></rect>
+              <text class="country-label" x="405" y="385">Nigeria</text>
+
+              <rect class="country" data-country="GHA" x="240" y="360" width="72" height="84" rx="18" tabindex="0"></rect>
+              <text class="country-label" x="276" y="409">Ghana</text>
+
+              <rect class="country" data-country="KEN" x="655" y="465" width="100" height="92" rx="18" tabindex="0"></rect>
+              <text class="country-label" x="705" y="516">Kenya</text>
+
+              <rect class="country" data-country="TZA" x="620" y="560" width="110" height="58" rx="18" tabindex="0"></rect>
+              <text class="country-label" x="675" y="594">Tanzania</text>
+
+              <rect class="country" data-country="COD" x="455" y="438" width="170" height="108" rx="18" tabindex="0"></rect>
+              <text class="country-label" x="540" y="495">DRC</text>
+
+              <rect class="country" data-country="AGO" x="420" y="565" width="138" height="60" rx="18" tabindex="0"></rect>
+              <text class="country-label" x="489" y="600">Angola</text>
+
+              <rect class="country" data-country="ZAF" x="565" y="600" width="155" height="38" rx="18" tabindex="0"></rect>
+              <text class="country-label" x="642" y="625">South Africa</text>
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <aside class="detail-panel" aria-label="Country details panel">
+        <div class="detail-header">
+          <div class="detail-pill">Country details</div>
+          <h2 class="detail-country" id="detailCountry">Select a country</h2>
+          <p id="detailIntro">Tap a country on the map to load its current notes into this side panel.</p>
+        </div>
+
+        <div id="detailContent">
+          <div class="detail-empty">
+            No country selected yet. This panel is ready to display Firestore-backed information once the map is wired to your database.
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="legend" aria-label="Map legend">
+      <h3>Legend</h3>
+      <div class="legend-items">
+        <div class="legend-item"><span class="swatch swatch-default"></span> Default country</div>
+        <div class="legend-item"><span class="swatch swatch-hover"></span> Hover or focus</div>
+        <div class="legend-item"><span class="swatch swatch-active"></span> Selected country</div>
+      </div>
+      <p style="margin-top: 12px;">This is the easiest iPad-friendly pattern for version 1: map on the left, persistent details on the right.</p>
+    </section>
+  </main>
+
+  <script>
+    const countryData = {
+      MAR: {
+        name: 'Morocco',
+        leadTime: 'Example placeholder',
+        validity: 'Example placeholder',
+        portsOfEntry: ['GMMX', 'GMMN'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Replace this with Firestore-backed country notes.'
+      },
+      DZA: {
+        name: 'Algeria',
+        leadTime: '15 days standard missions',
+        validity: 'ETA plus 72 hours',
+        portsOfEntry: ['DAAG', 'DAUG', 'DAAT'],
+        aircrewVisa: 'Required for RON',
+        passengerVisa: 'Required for RON',
+        planningNotes: 'No blanket clearance. Replace this object with live database data.'
+      },
+      LBY: {
+        name: 'Libya',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['HLLB'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.'
+      },
+      EGY: {
+        name: 'Egypt',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['HECA'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.'
+      },
+      MLI: {
+        name: 'Mali',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['GABS'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.'
+      },
+      NER: {
+        name: 'Niger',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['DRRN'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.'
+      },
+      TCD: {
+        name: 'Chad',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['FTTJ'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.'
+      },
+      SDN: {
+        name: 'Sudan',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['HSSS'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.'
+      },
+      ETH: {
+        name: 'Ethiopia',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['HAAB'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.'
+      },
+      DJI: {
+        name: 'Djibouti',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['HDAM'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry for Djibouti.'
+      },
+      NGA: {
+        name: 'Nigeria',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['DNMM'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.'
+      },
+      GHA: {
+        name: 'Ghana',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['DGAA'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.'
+      },
+      KEN: {
+        name: 'Kenya',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['HKJK'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.'
+      },
+      TZA: {
+        name: 'Tanzania',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['HTDA'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.'
+      },
+      COD: {
+        name: 'Democratic Republic of the Congo',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['FZAA'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.'
+      },
+      AGO: {
+        name: 'Angola',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['FNLU'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.'
+      },
+      ZAF: {
+        name: 'South Africa',
+        leadTime: 'Placeholder',
+        validity: 'Placeholder',
+        portsOfEntry: ['FAOR'],
+        aircrewVisa: 'TBD',
+        passengerVisa: 'TBD',
+        planningNotes: 'Placeholder country entry.'
+      }
+    };
+
+    const detailCountry = document.getElementById('detailCountry');
+    const detailIntro = document.getElementById('detailIntro');
+    const detailContent = document.getElementById('detailContent');
+    const countryEls = document.querySelectorAll('.country');
+
+    function renderCountry(code) {
+      const data = countryData[code];
+      if (!data) return;
+
+      countryEls.forEach((el) => {
+        el.classList.toggle('active', el.dataset.country === code);
+      });
+
+      detailCountry.textContent = data.name;
+      detailIntro.textContent = `ISO code: ${code}. Replace this in-memory object with a Firestore read for the selected country.`;
+
+      detailContent.innerHTML = `
+        <dl class="detail-list">
+          <div class="detail-field">
+            <dt>Lead Time</dt>
+            <dd>${data.leadTime}</dd>
+          </div>
+          <div class="detail-field">
+            <dt>Validity</dt>
+            <dd>${data.validity}</dd>
+          </div>
+          <div class="detail-field">
+            <dt>Ports of Entry</dt>
+            <dd>${data.portsOfEntry.join(', ')}</dd>
+          </div>
+          <div class="detail-field">
+            <dt>Aircrew Visa</dt>
+            <dd>${data.aircrewVisa}</dd>
+          </div>
+          <div class="detail-field">
+            <dt>Passenger Visa</dt>
+            <dd>${data.passengerVisa}</dd>
+          </div>
+          <div class="detail-field">
+            <dt>Planning Notes</dt>
+            <dd>${data.planningNotes}</dd>
+          </div>
+        </dl>
+      `;
+    }
+
+    countryEls.forEach((el) => {
+      el.addEventListener('click', () => renderCountry(el.dataset.country));
+      el.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          renderCountry(el.dataset.country);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
