@@ -382,7 +382,7 @@
       <nav class="top-actions" aria-label="Page navigation">
         <a class="btn btn-secondary" href="home.html">Home</a>
         <a class="btn btn-secondary" href="notes.html">Notes</a>
-        <a class="btn btn-primary" href="index.html">Login</a>
+        <button class="btn btn-primary" id="signOutBtn" type="button">Sign Out</button>
       </nav>
     </header>
 
@@ -478,162 +478,74 @@
     </section>
   </main>
 
-  <script>
-    const countryData = {
-      MAR: {
-        name: 'Morocco',
-        leadTime: 'Example placeholder',
-        validity: 'Example placeholder',
-        portsOfEntry: ['GMMX', 'GMMN'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Replace this with Firestore-backed country notes.'
-      },
-      DZA: {
-        name: 'Algeria',
-        leadTime: '15 days standard missions',
-        validity: 'ETA plus 72 hours',
-        portsOfEntry: ['DAAG', 'DAUG', 'DAAT'],
-        aircrewVisa: 'Required for RON',
-        passengerVisa: 'Required for RON',
-        planningNotes: 'No blanket clearance. Replace this object with live database data.'
-      },
-      LBY: {
-        name: 'Libya',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['HLLB'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.'
-      },
-      EGY: {
-        name: 'Egypt',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['HECA'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.'
-      },
-      MLI: {
-        name: 'Mali',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['GABS'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.'
-      },
-      NER: {
-        name: 'Niger',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['DRRN'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.'
-      },
-      TCD: {
-        name: 'Chad',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['FTTJ'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.'
-      },
-      SDN: {
-        name: 'Sudan',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['HSSS'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.'
-      },
-      ETH: {
-        name: 'Ethiopia',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['HAAB'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.'
-      },
-      DJI: {
-        name: 'Djibouti',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['HDAM'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry for Djibouti.'
-      },
-      NGA: {
-        name: 'Nigeria',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['DNMM'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.'
-      },
-      GHA: {
-        name: 'Ghana',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['DGAA'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.'
-      },
-      KEN: {
-        name: 'Kenya',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['HKJK'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.'
-      },
-      TZA: {
-        name: 'Tanzania',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['HTDA'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.'
-      },
-      COD: {
-        name: 'Democratic Republic of the Congo',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['FZAA'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.'
-      },
-      AGO: {
-        name: 'Angola',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['FNLU'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.'
-      },
-      ZAF: {
-        name: 'South Africa',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['FAOR'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.'
-      }
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDiFzsjV1ccCCZKssdGKT4UQusQL-IXy-E",
+      authDomain: "africa-ops-notes.firebaseapp.com",
+      projectId: "africa-ops-notes",
+      storageBucket: "africa-ops-notes.firebasestorage.app",
+      messagingSenderId: "503859879624",
+      appId: "1:503859879624:web:e3e77ba959b31420998ffd"
     };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const signOutBtn = document.getElementById('signOutBtn');
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = 'index.html';
+      }
+    });
+
+    signOutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+        window.location.href = 'index.html';
+      } catch (error) {
+        console.error('Sign-out failed:', error);
+        alert('Unable to sign out right now. Please try again.');
+      }
+    });
+
+    let countryData = {};
+
+    async function fetchCountryData() {
+      const snapshot = await getDocs(collection(db, 'countries'));
+      countryData = {};
+
+      snapshot.docs.forEach((countryDoc) => {
+        const data = countryDoc.data();
+        const key = (data.iso3 || countryDoc.id || '').toUpperCase();
+        if (!key) return;
+
+        countryData[key] = {
+          name: data.name || key,
+          leadTime: data.leadTime || '',
+          validity: data.validity || '',
+          portsOfEntry: Array.isArray(data.portsOfEntry) ? data.portsOfEntry : [],
+          aircrewVisa: data.aircrewVisa || '',
+          passengerVisa: data.passengerVisa || '',
+          planningNotes: data.planningNotes || '',
+          generalNotes: data.generalNotes || '',
+          lastUpdatedBy: data.lastUpdatedBy || '--',
+          lastUpdatedAt: data.lastUpdatedAt || '--'
+        };
+      });
+    }
 
     const detailCountry = document.getElementById('detailCountry');
     const detailIntro = document.getElementById('detailIntro');
@@ -641,41 +553,71 @@
     const countryEls = document.querySelectorAll('.country');
 
     function renderCountry(code) {
-      const data = countryData[code];
-      if (!data) return;
+      const normalizedCode = (code || '').toUpperCase();
+      const data = countryData[normalizedCode];
 
       countryEls.forEach((el) => {
-        el.classList.toggle('active', el.dataset.country === code);
+        el.classList.toggle('active', el.dataset.country === normalizedCode);
       });
 
+      if (!data) {
+        detailCountry.textContent = normalizedCode || 'Unknown country';
+        detailIntro.textContent = `ISO code: ${normalizedCode}. No Firestore record found for this country yet.`;
+        detailContent.innerHTML = `
+          <div class="detail-empty">
+            No country record exists yet for ${normalizedCode || 'this selection'}. Create it on the Notes page to populate the map side panel.
+          </div>
+        `;
+        return;
+      }
+
+      let updatedAtText = '--';
+      if (data.lastUpdatedAt && typeof data.lastUpdatedAt.toDate === 'function') {
+        updatedAtText = data.lastUpdatedAt.toDate().toLocaleString();
+      } else if (data.lastUpdatedAt) {
+        updatedAtText = data.lastUpdatedAt;
+      }
+
       detailCountry.textContent = data.name;
-      detailIntro.textContent = `ISO code: ${code}. Replace this in-memory object with a Firestore read for the selected country.`;
+      detailIntro.textContent = `ISO code: ${normalizedCode}. Loaded from Firestore.`;
 
       detailContent.innerHTML = `
         <dl class="detail-list">
           <div class="detail-field">
             <dt>Lead Time</dt>
-            <dd>${data.leadTime}</dd>
+            <dd>${data.leadTime || '--'}</dd>
           </div>
           <div class="detail-field">
             <dt>Validity</dt>
-            <dd>${data.validity}</dd>
+            <dd>${data.validity || '--'}</dd>
           </div>
           <div class="detail-field">
             <dt>Ports of Entry</dt>
-            <dd>${data.portsOfEntry.join(', ')}</dd>
+            <dd>${data.portsOfEntry.length ? data.portsOfEntry.join(', ') : '--'}</dd>
           </div>
           <div class="detail-field">
             <dt>Aircrew Visa</dt>
-            <dd>${data.aircrewVisa}</dd>
+            <dd>${data.aircrewVisa || '--'}</dd>
           </div>
           <div class="detail-field">
             <dt>Passenger Visa</dt>
-            <dd>${data.passengerVisa}</dd>
+            <dd>${data.passengerVisa || '--'}</dd>
           </div>
           <div class="detail-field">
             <dt>Planning Notes</dt>
-            <dd>${data.planningNotes}</dd>
+            <dd>${data.planningNotes || '--'}</dd>
+          </div>
+          <div class="detail-field">
+            <dt>General Notes</dt>
+            <dd>${data.generalNotes || '--'}</dd>
+          </div>
+          <div class="detail-field">
+            <dt>Last Updated By</dt>
+            <dd>${data.lastUpdatedBy || '--'}</dd>
+          </div>
+          <div class="detail-field">
+            <dt>Last Updated</dt>
+            <dd>${updatedAtText}</dd>
           </div>
         </dl>
       `;
@@ -689,6 +631,17 @@
           renderCountry(el.dataset.country);
         }
       });
+    });
+
+    fetchCountryData().catch((error) => {
+      console.error('Failed to load map country data:', error);
+      detailCountry.textContent = 'Unable to load country data';
+      detailIntro.textContent = 'Firestore read failed.';
+      detailContent.innerHTML = `
+        <div class="detail-empty">
+          Unable to load country records from Firestore right now. Check your Firestore setup and security rules.
+        </div>
+      `;
     });
   </script>
 </body>
