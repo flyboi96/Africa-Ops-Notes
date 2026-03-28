@@ -682,6 +682,29 @@ let dragStartY = 0;
 
       svgEl.setAttribute('role', 'img');
       svgEl.setAttribute('aria-label', 'Interactive political map of Africa');
+
+
+      const originalWidth = svgEl.getAttribute('width');
+      const originalHeight = svgEl.getAttribute('height');
+      if (!svgEl.getAttribute('viewBox') && originalWidth && originalHeight) {
+        const widthNum = parseFloat(originalWidth);
+        const heightNum = parseFloat(originalHeight);
+        if (!Number.isNaN(widthNum) && !Number.isNaN(heightNum)) {
+          svgEl.setAttribute('viewBox', `0 0 ${widthNum} ${heightNum}`);
+        }
+      }
+
+
+      const originalWidth = svgEl.getAttribute('width');
+      const originalHeight = svgEl.getAttribute('height');
+      if (!svgEl.getAttribute('viewBox') && originalWidth && originalHeight) {
+        const widthNum = parseFloat(originalWidth);
+        const heightNum = parseFloat(originalHeight);
+        if (!Number.isNaN(widthNum) && !Number.isNaN(heightNum)) {
+          svgEl.setAttribute('viewBox', `0 0 ${widthNum} ${heightNum}`);
+        }
+      }
+
       svgEl.removeAttribute('width');
       svgEl.removeAttribute('height');
       svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
