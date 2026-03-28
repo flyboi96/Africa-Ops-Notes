@@ -398,7 +398,7 @@
       <nav class="top-actions" aria-label="Page navigation">
         <a class="btn btn-secondary" href="home.html">Home</a>
         <a class="btn btn-secondary" href="map.html">Map</a>
-        <a class="btn btn-primary" href="index.html">Login</a>
+        <button class="btn btn-primary" id="signOutBtn" type="button">Sign Out</button>
       </nav>
     </header>
 
@@ -497,141 +497,53 @@
     </div>
   </main>
 
-  <script>
-    const countries = [
-      {
-        iso3: 'DZA',
-        name: 'Algeria',
-        leadTime: '15 days standard missions',
-        validity: 'ETA plus 72 hours',
-        portsOfEntry: ['DAAG', 'DAUG', 'DAAT'],
-        aircrewVisa: 'Required for RON',
-        passengerVisa: 'Required for RON',
-        planningNotes: 'No blanket clearance.',
-        generalNotes: 'Replace this placeholder data with Firestore-backed records.',
-        lastUpdatedBy: 'Alex Corbin',
-        lastUpdatedAt: 'Placeholder'
-      },
-      {
-        iso3: 'DJI',
-        name: 'Djibouti',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['HDAM'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry for Djibouti.',
-        generalNotes: 'Add Djibouti-specific planning notes here.',
-        lastUpdatedBy: 'Alex Corbin',
-        lastUpdatedAt: 'Placeholder'
-      },
-      {
-        iso3: 'EGY',
-        name: 'Egypt',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['HECA'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.',
-        generalNotes: 'Add Egypt-specific planning notes here.',
-        lastUpdatedBy: 'Alex Corbin',
-        lastUpdatedAt: 'Placeholder'
-      },
-      {
-        iso3: 'ETH',
-        name: 'Ethiopia',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['HAAB'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.',
-        generalNotes: 'Add Ethiopia-specific planning notes here.',
-        lastUpdatedBy: 'Alex Corbin',
-        lastUpdatedAt: 'Placeholder'
-      },
-      {
-        iso3: 'GHA',
-        name: 'Ghana',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['DGAA'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.',
-        generalNotes: 'Add Ghana-specific planning notes here.',
-        lastUpdatedBy: 'Alex Corbin',
-        lastUpdatedAt: 'Placeholder'
-      },
-      {
-        iso3: 'KEN',
-        name: 'Kenya',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['HKJK'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.',
-        generalNotes: 'Add Kenya-specific planning notes here.',
-        lastUpdatedBy: 'Alex Corbin',
-        lastUpdatedAt: 'Placeholder'
-      },
-      {
-        iso3: 'LBY',
-        name: 'Libya',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['HLLB'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.',
-        generalNotes: 'Add Libya-specific planning notes here.',
-        lastUpdatedBy: 'Alex Corbin',
-        lastUpdatedAt: 'Placeholder'
-      },
-      {
-        iso3: 'MAR',
-        name: 'Morocco',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['GMMX', 'GMMN'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.',
-        generalNotes: 'Add Morocco-specific planning notes here.',
-        lastUpdatedBy: 'Alex Corbin',
-        lastUpdatedAt: 'Placeholder'
-      },
-      {
-        iso3: 'NGA',
-        name: 'Nigeria',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['DNMM'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.',
-        generalNotes: 'Add Nigeria-specific planning notes here.',
-        lastUpdatedBy: 'Alex Corbin',
-        lastUpdatedAt: 'Placeholder'
-      },
-      {
-        iso3: 'TZA',
-        name: 'Tanzania',
-        leadTime: 'Placeholder',
-        validity: 'Placeholder',
-        portsOfEntry: ['HTDA'],
-        aircrewVisa: 'TBD',
-        passengerVisa: 'TBD',
-        planningNotes: 'Placeholder country entry.',
-        generalNotes: 'Add Tanzania-specific planning notes here.',
-        lastUpdatedBy: 'Alex Corbin',
-        lastUpdatedAt: 'Placeholder'
-      }
-    ];
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      doc,
+      setDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 
-    countries.sort((a, b) => a.name.localeCompare(b.name));
+    const firebaseConfig = {
+      apiKey: "AIzaSyDiFzsjV1ccCCZKssdGKT4UQusQL-IXy-E",
+      authDomain: "africa-ops-notes.firebaseapp.com",
+      projectId: "africa-ops-notes",
+      storageBucket: "africa-ops-notes.firebasestorage.app",
+      messagingSenderId: "503859879624",
+      appId: "1:503859879624:web:e3e77ba959b31420998ffd"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const signOutBtn = document.getElementById('signOutBtn');
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = 'index.html';
+      }
+    });
+
+    signOutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+        window.location.href = 'index.html';
+      } catch (error) {
+        console.error('Sign-out failed:', error);
+        alert('Unable to sign out right now. Please try again.');
+      }
+    });
+
+    let countries = [];
 
     const countryList = document.getElementById('countryList');
     const countrySearch = document.getElementById('countrySearch');
@@ -665,7 +577,53 @@
     }
 
     function getCountryByIso(iso) {
-      return countries.find((country) => country.iso3 === iso) || null;
+      return countries.find((country) => country.iso3 === iso || country.id === iso) || null;
+    }
+
+    function normalizeCountry(id, data) {
+      return {
+        id,
+        iso3: data.iso3 || id,
+        name: data.name || id,
+        leadTime: data.leadTime || '',
+        validity: data.validity || '',
+        portsOfEntry: Array.isArray(data.portsOfEntry) ? data.portsOfEntry : [],
+        aircrewVisa: data.aircrewVisa || '',
+        passengerVisa: data.passengerVisa || '',
+        planningNotes: data.planningNotes || '',
+        generalNotes: data.generalNotes || '',
+        lastUpdatedBy: data.lastUpdatedBy || '--',
+        lastUpdatedAt: data.lastUpdatedAt || '--'
+      };
+    }
+
+    async function fetchCountries() {
+      setStatus('Loading countries from Firestore...');
+
+      const snapshot = await getDocs(collection(db, 'countries'));
+      countries = snapshot.docs.map((countryDoc) => {
+        const data = countryDoc.data();
+        return normalizeCountry(countryDoc.id, data);
+      });
+
+      countries.sort((a, b) => a.name.localeCompare(b.name));
+      renderCountryList(countrySearch.value);
+
+      if (countries.length) {
+        const preferred = getCountryByIso(selectedIso) || countries[0];
+        loadCountry(preferred.id || preferred.iso3);
+      } else {
+        selectedIso = null;
+        countryHeading.textContent = 'No countries found';
+        countrySubheading.textContent = 'Create country documents in the Firestore countries collection to populate this page.';
+        metaIso.textContent = '--';
+        metaUpdatedBy.textContent = '--';
+        metaUpdatedAt.textContent = '--';
+        Object.values(fields).forEach((field) => {
+          field.value = '';
+        });
+        setStatus('No countries found in Firestore.');
+      }
     }
 
     function renderCountryList(filter = '') {
@@ -680,11 +638,11 @@
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'country-button';
-        if (country.iso3 === selectedIso) {
+        if ((country.id || country.iso3) === selectedIso) {
           button.classList.add('active');
         }
         button.innerHTML = `<strong>${country.name}</strong><span>${country.iso3}</span>`;
-        button.addEventListener('click', () => loadCountry(country.iso3));
+        button.addEventListener('click', () => loadCountry(country.id || country.iso3));
         countryList.appendChild(button);
       });
 
@@ -697,12 +655,17 @@
       const country = getCountryByIso(iso);
       if (!country) return;
 
-      selectedIso = iso;
+      selectedIso = country.id || country.iso3;
       countryHeading.textContent = country.name;
-      countrySubheading.textContent = `Editing scaffold for ${country.name}. Replace local state with Firestore reads and writes next.`;
+      countrySubheading.textContent = `${country.name} loaded from Firestore.`;
       metaIso.textContent = country.iso3 || '--';
       metaUpdatedBy.textContent = country.lastUpdatedBy || '--';
-      metaUpdatedAt.textContent = country.lastUpdatedAt || '--';
+
+      if (country.lastUpdatedAt && typeof country.lastUpdatedAt.toDate === 'function') {
+        metaUpdatedAt.textContent = country.lastUpdatedAt.toDate().toLocaleString();
+      } else {
+        metaUpdatedAt.textContent = country.lastUpdatedAt || '--';
+      }
 
       fields.countryName.value = country.name || '';
       fields.iso3.value = country.iso3 || '';
@@ -718,7 +681,7 @@
       setStatus(`Loaded ${country.name}.`, 'success');
     }
 
-    notesForm.addEventListener('submit', (event) => {
+    notesForm.addEventListener('submit', async (event) => {
       event.preventDefault();
 
       if (!selectedIso) {
@@ -726,27 +689,42 @@
         return;
       }
 
-      const country = getCountryByIso(selectedIso);
-      if (!country) return;
+      const countryName = fields.countryName.value.trim();
+      const iso3 = fields.iso3.value.trim().toUpperCase();
 
-      country.name = fields.countryName.value.trim();
-      country.iso3 = fields.iso3.value.trim().toUpperCase();
-      country.leadTime = fields.leadTime.value.trim();
-      country.validity = fields.validity.value.trim();
-      country.portsOfEntry = fields.portsOfEntry.value
-        .split(',')
-        .map((item) => item.trim())
-        .filter(Boolean);
-      country.aircrewVisa = fields.aircrewVisa.value.trim();
-      country.passengerVisa = fields.passengerVisa.value.trim();
-      country.planningNotes = fields.planningNotes.value.trim();
-      country.generalNotes = fields.generalNotes.value.trim();
-      country.lastUpdatedBy = 'Local placeholder user';
-      country.lastUpdatedAt = new Date().toLocaleString();
+      if (!countryName || !iso3) {
+        setStatus('Country Name and ISO3 are required.');
+        return;
+      }
 
-      selectedIso = country.iso3;
-      loadCountry(selectedIso);
-      setStatus(`Saved placeholder changes for ${country.name}. Connect this action to Firestore next.`, 'success');
+      const docId = iso3;
+      const payload = {
+        name: countryName,
+        iso3,
+        leadTime: fields.leadTime.value.trim(),
+        validity: fields.validity.value.trim(),
+        portsOfEntry: fields.portsOfEntry.value
+          .split(',')
+          .map((item) => item.trim())
+          .filter(Boolean),
+        aircrewVisa: fields.aircrewVisa.value.trim(),
+        passengerVisa: fields.passengerVisa.value.trim(),
+        planningNotes: fields.planningNotes.value.trim(),
+        generalNotes: fields.generalNotes.value.trim(),
+        lastUpdatedBy: auth.currentUser?.email || 'Unknown user',
+        lastUpdatedAt: serverTimestamp()
+      };
+
+      try {
+        setStatus(`Saving ${countryName} to Firestore...`);
+        await setDoc(doc(db, 'countries', docId), payload, { merge: true });
+        selectedIso = docId;
+        await fetchCountries();
+        setStatus(`Saved ${countryName} to Firestore.`, 'success');
+      } catch (error) {
+        console.error('Save failed:', error);
+        setStatus('Unable to save country notes right now.');
+      }
     });
 
     resetBtn.addEventListener('click', () => {
@@ -762,8 +740,10 @@
       renderCountryList(countrySearch.value);
     });
 
-    renderCountryList();
-    loadCountry('DZA');
+    fetchCountries().catch((error) => {
+      console.error('Failed to load countries:', error);
+      setStatus('Unable to load countries from Firestore.');
+    });
   </script>
 </body>
 </html>
