@@ -244,6 +244,19 @@
       pointer-events: none;
     }
 
+    .debug-box {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
     .country {
       fill: var(--country);
       stroke: rgba(255, 255, 255, 0.22);
@@ -452,6 +465,7 @@
             No country selected yet. This panel is ready to display Firestore-backed information once the map is wired to your database.
           </div>
         </div>
+        <div id="debugBox" class="debug-box">Debug: waiting for map and Firestore load...</div>
       </aside>
     </section>
 
@@ -493,6 +507,7 @@
     const db = getFirestore(app);
     const signOutBtn = document.getElementById('signOutBtn');
     const africaSvgContainer = document.getElementById('africaSvgContainer');
+    const debugBox = document.getElementById('debugBox');
 
     onAuthStateChanged(auth, (user) => {
       if (!user) {
@@ -580,13 +595,24 @@
       return matchClass ? matchClass.toLowerCase() : '';
     }
 
+    function setDebug(message) {
+      debugBox.textContent = `Debug: ${message}`;
+      console.log('[Africa Map Debug]', message);
+    }
+
     async function loadAfricaSvg() {
-      const response = await fetch('./BlankMap-Africa.svg');
+      const svgUrl = new URL('./BlankMap-Africa.svg', window.location.href).toString();
+      setDebug(`Loading SVG from ${svgUrl}`);
+
+      const response = await fetch(svgUrl, { cache: 'no-store' });
+      setDebug(`SVG fetch status: ${response.status} ${response.statusText}`);
+
       if (!response.ok) {
-        throw new Error(`SVG load failed with status ${response.status}`);
+        throw new Error(`SVG load failed from ${svgUrl} with status ${response.status}`);
       }
 
       const svgText = await response.text();
+      setDebug(`SVG text loaded. Length: ${svgText.length} characters.`);
       africaSvgContainer.innerHTML = svgText;
 
       const svgEl = africaSvgContainer.querySelector('svg');
@@ -600,11 +626,16 @@
       svgEl.removeAttribute('height');
       svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
 
-      africaSvgContainer.querySelectorAll('.land').forEach((el) => {
+      const landElements = africaSvgContainer.querySelectorAll('.land');
+      setDebug(`SVG rendered. Found ${landElements.length} .land elements.`);
+
+      let interactiveCount = 0;
+      landElements.forEach((el) => {
         const iso2 = extractIso2(el);
         const iso3 = iso2ToIso3[iso2];
         if (!iso3) return;
 
+        interactiveCount += 1;
         el.dataset.country = iso3;
         el.setAttribute('tabindex', '0');
 
@@ -616,9 +647,12 @@
           }
         });
       });
+
+      setDebug(`SVG ready. Interactive country elements mapped: ${interactiveCount}.`);
     }
 
     async function fetchCountryData() {
+      setDebug('Loading Firestore country data...');
       const snapshot = await getDocs(collection(db, 'countries'));
       countryData = {};
 
@@ -640,6 +674,8 @@
           lastUpdatedAt: data.lastUpdatedAt || '--'
         };
       });
+
+      setDebug(`Firestore loaded. Country documents found: ${snapshot.docs.length}.`);
     }
 
     const detailCountry = document.getElementById('detailCountry');
@@ -718,16 +754,39 @@
       `;
     }
 
-    Promise.all([loadAfricaSvg(), fetchCountryData()]).catch((error) => {
-      console.error('Failed to load map page data:', error);
-      detailCountry.textContent = 'Unable to load country data';
-      detailIntro.textContent = 'Map or Firestore load failed.';
-      detailContent.innerHTML = `
-        <div class="detail-empty">
-          Unable to load the Africa SVG or Firestore country records right now. Check that BlankMap-Africa.svg is in the project root and that Firestore is configured correctly.
-        </div>
-      `;
-      africaSvgContainer.innerHTML = 'Unable to load Africa map.';
+    Promise.allSettled([loadAfricaSvg(), fetchCountryData()]).then((results) => {
+      const [svgResult, firestoreResult] = results;
+
+      if (svgResult.status === 'rejected') {
+        console.error('SVG load failed:', svgResult.reason);
+        detailCountry.textContent = 'Unable to load country data';
+        detailIntro.textContent = 'SVG load failed.';
+        detailContent.innerHTML = `
+          <div class="detail-empty">
+            The Africa SVG failed to load. See the debug box below for the exact URL and error details.
+          </div>
+        `;
+        africaSvgContainer.innerHTML = 'Unable to load Africa map.';
+        setDebug(`SVG load error: ${svgResult.reason?.message || svgResult.reason}`);
+      }
+
+      if (firestoreResult.status === 'rejected') {
+        console.error('Firestore load failed:', firestoreResult.reason);
+        setDebug(`Firestore load error: ${firestoreResult.reason?.message || firestoreResult.reason}`);
+
+        if (svgResult.status === 'fulfilled') {
+          detailIntro.textContent = 'Map loaded, but Firestore read failed.';
+          detailContent.innerHTML = `
+            <div class="detail-empty">
+              The map loaded, but Firestore country records could not be read. Check Firestore rules, sign-in state, and the countries collection.
+            </div>
+          `;
+        }
+      }
+
+      if (svgResult.status === 'fulfilled' && firestoreResult.status === 'fulfilled') {
+        setDebug('Map SVG and Firestore data both loaded successfully.');
+      }
     });
   </script>
 </body>
