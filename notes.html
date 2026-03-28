@@ -444,6 +444,10 @@
             <label for="iso3">ISO3</label>
             <input id="iso3" name="iso3" type="text" placeholder="ISO3 code" maxlength="3" />
           </div>
+          <div class="field">
+            <label for="lastUpdatedByInput">Last Updated By</label>
+            <input id="lastUpdatedByInput" name="lastUpdatedByInput" type="text" placeholder="Enter last name" />
+          </div>
 
           <div class="field">
             <label for="leadTime">Lead Time</label>
@@ -560,6 +564,7 @@
     const fields = {
       countryName: document.getElementById('countryName'),
       iso3: document.getElementById('iso3'),
+      lastUpdatedByInput: document.getElementById('lastUpdatedByInput'),
       leadTime: document.getElementById('leadTime'),
       validity: document.getElementById('validity'),
       portsOfEntry: document.getElementById('portsOfEntry'),
@@ -669,6 +674,7 @@
 
       fields.countryName.value = country.name || '';
       fields.iso3.value = country.iso3 || '';
+      fields.lastUpdatedByInput.value = country.lastUpdatedBy || '';
       fields.leadTime.value = country.leadTime || '';
       fields.validity.value = country.validity || '';
       fields.portsOfEntry.value = (country.portsOfEntry || []).join(', ');
@@ -691,9 +697,15 @@
 
       const countryName = fields.countryName.value.trim();
       const iso3 = fields.iso3.value.trim().toUpperCase();
+      const lastUpdatedBy = fields.lastUpdatedByInput.value.trim();
 
       if (!countryName || !iso3) {
         setStatus('Country Name and ISO3 are required.');
+        return;
+      }
+
+      if (!lastUpdatedBy) {
+        setStatus('Last Updated By is required.');
         return;
       }
 
@@ -711,7 +723,7 @@
         passengerVisa: fields.passengerVisa.value.trim(),
         planningNotes: fields.planningNotes.value.trim(),
         generalNotes: fields.generalNotes.value.trim(),
-        lastUpdatedBy: auth.currentUser?.email || 'Unknown user',
+        lastUpdatedBy,
         lastUpdatedAt: serverTimestamp()
       };
 
